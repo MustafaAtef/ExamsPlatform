@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../ExamsPlatform.Application/ExamsPlatform.Application.csproj" />
     <ProjectReference Include="../ExamsPlatform.Infrastructure/ExamsPlatform.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

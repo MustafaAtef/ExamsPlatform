@@ -7,12 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Auth/" />
     <Folder Include="Database/" />
     <Folder Include="Repositories/" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../ExamsPlatform.Core/ExamsPlatform.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +18,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ExamsPlatform.Application/ExamsPlatform.Application.csproj" />
   </ItemGroup>
 
 </Project>
