@@ -12,7 +12,7 @@ public class User
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public string? EmailVerificationToken { get; set; }
-    public DateTime EmailVerificationTokenExpiryTime { get; set; }
+    public DateTime? EmailVerificationTokenExpiryTime { get; set; }
     public bool IsEmailVerified { get; set; }
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiryTime { get; set; }

@@ -11,4 +11,9 @@
     <ProjectReference Include="../ExamsPlatform.Core/ExamsPlatform.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+  </ItemGroup>
+
 </Project>

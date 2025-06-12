@@ -1,8 +1,7 @@
-using System;
-
 namespace ExamsPlatform.Application.ServiceContracts;
 
 public interface IEmailService
 {
-    Task SendAsync();
+    Task SendEmailVerificationAsync(string toEmail, string token, DateTime tokenExpiration);
+    Task SendPasswordResetAsync(string toEmail, string token, DateTime tokenExpiration);
 }

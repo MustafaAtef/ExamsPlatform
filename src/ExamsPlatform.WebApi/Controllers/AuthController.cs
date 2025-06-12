@@ -1,5 +1,6 @@
 using ExamsPlatform.Application.Dtos;
 using ExamsPlatform.Application.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamsPlatform.WebApi.Controllers
@@ -37,7 +38,7 @@ namespace ExamsPlatform.WebApi.Controllers
             return Ok();
         }
 
-        [HttpGet("verify-email")]
+        [HttpGet("activate")]
         public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
             var isVerified = await _authService.VerifyEmailAsync(token);
@@ -56,9 +57,9 @@ namespace ExamsPlatform.WebApi.Controllers
         }
 
         [HttpGet("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromQuery] string token)
+        public async Task<IActionResult> VerifyPasswordResetToken([FromQuery] string token)
         {
-            var isValid = await _authService.VerifyPasswordResetTokenAsync(token);
+            var isValid = await _authService.IsPasswordResetTokenValidAsync(token);
             if (isValid)
             {
                 return Ok();
@@ -74,6 +75,7 @@ namespace ExamsPlatform.WebApi.Controllers
         }
 
         [HttpPost("change-password")]
+        [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordRequestDto changePasswordRequestDto)
         {
             await _authService.ChangePasswordAsync(changePasswordRequestDto);

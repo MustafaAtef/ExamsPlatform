@@ -5,6 +5,7 @@ using ExamsPlatform.Application.ServiceContracts;
 using ExamsPlatform.Application.Services;
 using ExamsPlatform.Infrastructure.Auth;
 using ExamsPlatform.Infrastructure.Database;
+using ExamsPlatform.Infrastructure.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,10 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("jwt"));
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("email"));
+builder.Services.AddHttpContextAccessor();
+
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var jwtOptions = builder.Configuration.GetSection("jwt").Get<JwtOptions>();
