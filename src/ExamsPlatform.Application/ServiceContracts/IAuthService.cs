@@ -14,5 +14,4 @@ public interface IAuthService
     Task<bool> IsPasswordResetTokenValidAsync(string token);
     Task ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequestDto);
     Task ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto);
-
 }

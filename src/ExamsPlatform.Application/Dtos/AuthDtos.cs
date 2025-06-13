@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace ExamsPlatform.Application.Dtos;
 
@@ -25,12 +27,16 @@ public class LoginRequestDto
 
 public class RegisterRequestDto
 {
+    [Required(ErrorMessage = "First name is required.")]
     public string FirstName { get; set; }
+    [Required(ErrorMessage = "Last name is required.")]
     public string LastName { get; set; }
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
     public string Email { get; set; }
+    [Required(ErrorMessage = "Password is required.")]
     public string Password { get; set; }
-
-    // AVATAR
+    public IFormFile? Avatar { get; set; }
 }
 
 public class RefreshTokenRequestDto

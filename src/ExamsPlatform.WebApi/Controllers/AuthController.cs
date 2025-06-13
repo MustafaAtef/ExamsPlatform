@@ -21,7 +21,7 @@ namespace ExamsPlatform.WebApi.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AuthenticatedUserDto>> Register(RegisterRequestDto registerRequest)
+        public async Task<ActionResult<AuthenticatedUserDto>> Register([FromForm] RegisterRequestDto registerRequest)
         {
             return await _authService.RegisterAsync(registerRequest);
         }
@@ -81,5 +81,6 @@ namespace ExamsPlatform.WebApi.Controllers
             await _authService.ChangePasswordAsync(changePasswordRequestDto);
             return Ok();
         }
+
     }
 }

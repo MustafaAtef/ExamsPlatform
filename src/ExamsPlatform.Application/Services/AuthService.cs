@@ -19,7 +19,8 @@ public class AuthService : IAuthService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
-    public AuthService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IConfiguration configuration)
+    private readonly IFileUploader _fileUploader;
+    public AuthService(IUnitOfWork unitOfWork, IPasswordHasher passwordHasher, IJwtService jwtService, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IConfiguration configuration, IFileUploader fileUploader)
     {
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
@@ -27,6 +28,7 @@ public class AuthService : IAuthService
         _httpContextAccessor = httpContextAccessor;
         _emailService = emailService;
         _configuration = configuration;
+        _fileUploader = fileUploader;
     }
 
     public async Task<AuthenticatedUserDto> RegisterAsync(RegisterRequestDto registerRequest)
@@ -50,6 +52,15 @@ public class AuthService : IAuthService
         newUser.RefreshTokenExpiryTime = jwtData.RefreshTokenExpirationDate;
         newUser.EmailVerificationToken = _randomToken();
         newUser.EmailVerificationTokenExpiryTime = DateTime.Now.AddMinutes(_configuration["EmailVerificationTokenExpiryMinutes"] != null ? int.Parse(_configuration["EmailVerificationTokenExpiryMinutes"] ?? "") : 15);
+        if (registerRequest.Avatar != null)
+        {
+            var uploadedImage = await _fileUploader.UploadImageAsync(registerRequest.Avatar, "users-avatars");
+            newUser.Avatar = new Avatar
+            {
+                StorageProvider = uploadedImage.StorageProvider,
+                Url = uploadedImage.Url
+            };
+        }
         _unitOfWork.Users.Add(newUser);
         await _unitOfWork.SaveChangesAsync();
 
@@ -57,7 +68,7 @@ public class AuthService : IAuthService
         // a better approach would be to use a background service or a message queue to send the email asynchronously
         // but for simplicity we will keep it synchronous for now
 
-        await _emailService.SendEmailVerificationAsync(newUser.Email, newUser.EmailVerificationToken, newUser.EmailVerificationTokenExpiryTime.Value);
+        //await _emailService.SendEmailVerificationAsync(newUser.Email, newUser.EmailVerificationToken, newUser.EmailVerificationTokenExpiryTime.Value);
 
         return new AuthenticatedUserDto
         {
@@ -70,13 +81,13 @@ public class AuthService : IAuthService
             TokenExpirationDate = jwtData.TokenExpirationDate,
             RefreshToken = jwtData.RefreshToken,
             RefreshTokenExpirationDate = jwtData.RefreshTokenExpirationDate,
-            AvatarUrl = newUser.AvatarUrl ?? ""
+            AvatarUrl = newUser.Avatar is null ? "" : newUser.Avatar.StorageProvider == "server" ? $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}{newUser.Avatar.Url}" : newUser.Avatar.Url
         };
     }
 
     public async Task<AuthenticatedUserDto> LoginAsync(LoginRequestDto loginRequest)
     {
-        var user = await _unitOfWork.Users.GetAsync(u => u.Email == loginRequest.Email);
+        var user = await _unitOfWork.Users.GetAsync(u => u.Email == loginRequest.Email, ["Avatar"]);
         if (user == null || !_passwordHasher.VerifyPassword(loginRequest.Password, user.Password))
         {
 
@@ -99,7 +110,7 @@ public class AuthService : IAuthService
             TokenExpirationDate = jwtData.TokenExpirationDate,
             RefreshToken = jwtData.RefreshToken,
             RefreshTokenExpirationDate = jwtData.RefreshTokenExpirationDate,
-            AvatarUrl = user.AvatarUrl ?? ""
+            AvatarUrl = user.Avatar?.Url ?? ""
         };
     }
 
@@ -111,7 +122,7 @@ public class AuthService : IAuthService
             throw new Exception("Invalid refresh token.");
         }
         var userId = int.Parse(userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "-1");
-        var user = await _unitOfWork.Users.GetAsync(u => u.Id == userId);
+        var user = await _unitOfWork.Users.GetAsync(u => u.Id == userId, ["Avatar"]);
         if (user == null || user.RefreshToken != refreshTokenRequest.RefreshToken || user.RefreshTokenExpiryTime < DateTime.Now)
         {
             throw new Exception("Invalid refresh token.");
@@ -131,7 +142,7 @@ public class AuthService : IAuthService
             TokenExpirationDate = jwtData.TokenExpirationDate,
             RefreshToken = jwtData.RefreshToken,
             RefreshTokenExpirationDate = jwtData.RefreshTokenExpirationDate,
-            AvatarUrl = user.AvatarUrl ?? ""
+            AvatarUrl = user.Avatar?.Url ?? ""
         };
     }
     public async Task ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto)

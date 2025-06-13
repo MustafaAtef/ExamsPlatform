@@ -6,6 +6,7 @@ using ExamsPlatform.Application.Services;
 using ExamsPlatform.Infrastructure.Auth;
 using ExamsPlatform.Infrastructure.Database;
 using ExamsPlatform.Infrastructure.Email;
+using ExamsPlatform.Infrastructure.FileUploading;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,11 +19,22 @@ builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("email
 builder.Services.AddHttpContextAccessor();
 
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
+builder.Services.AddTransient<IJwtService, JwtService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<IFileUploader, ServerFileUploader>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<Supabase.Client>(_ => new Supabase.Client(
+    builder.Configuration["Supabase:Url"],
+    builder.Configuration["Supabase:Key"],
+     new()
+     {
+         AutoRefreshToken = true,
+         AutoConnectRealtime = true,
+     })
+);
 
 var jwtOptions = builder.Configuration.GetSection("jwt").Get<JwtOptions>();
 builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
@@ -46,6 +58,8 @@ builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.Authenticati
 });
 
 var app = builder.Build();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
